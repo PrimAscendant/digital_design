@@ -1,5 +1,5 @@
 //basic description or
-module basic_or (
+module simple_or (
 	input wire in_a,
 	input wire in_b,
 	output wire out_c
