@@ -6,3 +6,6 @@ module simple_or (
 );
   assign out_c = in_a | in_b;
 endmodule
+
+/*same moments as in mux.sv (IO names + data types)
+*/
