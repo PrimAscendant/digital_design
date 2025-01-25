@@ -1,8 +1,9 @@
 //basic description or
+
 module simple_or (
-	input wire in_a,
-	input wire in_b,
-	output wire out_c
+	input logic a_i,
+	input logic b_i,
+	output logic c_o
 );
-  assign out_c = in_a | in_b;
+  assign c_o = a_i | b_i;
 endmodule
