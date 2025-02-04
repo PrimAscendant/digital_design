@@ -1,12 +1,14 @@
 //Parameterized N-Bit Adder-Subtractor
+
 module one_bit_full_addr(
   input logic a_i, b_i,
   input logic cin_i,
   output logic sum_o,
   output logic cout_o
 );
-  
-  assign sum_o = a_i ^ b_i ^ cin_i;
+  logic temp_sum;
+  assign temp_sum = a_i ^ b_i; 
+  assign sum_o = temp_sum ^ cin_i;
   assign cout_o = (a_i & b_i) | (cin_i & (a_i ^ b_i));
 endmodule
 
@@ -18,22 +20,21 @@ module adder_subtractor #(parameter N = 4) (
 );
   logic [N-1:0] carry;
   logic [N-1:0] b_sub;
+  
+  assign b_sub = b_i ^ {N{sub_i}};
 
   genvar i;
+  generate // This will instantial one_bit_full_addr N-1 times
   
-  generate
     for(i = 0; i<N; i++) begin
-      assign b_sub[i] = b_i[i] ^ sub_i;
-    end
-  endgenerate
-  
-  one_bit_full_addr fa0(a_i[0], b_sub[0], sub_i, sum_o[0], carry[0]);
-  
-  generate  // This will instantial one_bit_full_addr N-1 times
-    for(i = 1; i<N; i++) begin
-     
+    if(i==0)begin
+      one_bit_full_addr fa0(a_i[0], b_sub[0], sub_i, sum_o[0], carry[0]);
+  end
+    else begin
       one_bit_full_addr fa(a_i[i], b_sub[i], carry[i-1], sum_o[i], carry[i]);
     end
-  endgenerate
+      end
+   endgenerate
+  
   assign cout_o = carry[N-1];
 endmodule
