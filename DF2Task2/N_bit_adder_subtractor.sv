@@ -21,7 +21,7 @@ module adder_subtractor #(parameter N = 4) (
   logic [N-1:0] carry;
   logic [N-1:0] b_sub;
   
-  assign b_sub = b_i ^ {N{sub_i}};
+  assign b_sub = b_i ^ sub_i;
 
   genvar i;
   generate // This will instantial one_bit_full_addr N-1 times
