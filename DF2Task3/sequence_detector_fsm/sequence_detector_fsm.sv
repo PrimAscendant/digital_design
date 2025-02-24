@@ -31,7 +31,7 @@ module fsm(
       end
 
       S1: begin
-        if (in_i == 1'b1) next = S2;
+        if (in_i == 1'b0) next = S2;
         else            next = S1;
       end
 
