@@ -1,5 +1,5 @@
 //`timescale 1ns / 1ps
-// Revision 0.3
+// Revision 0.5
 
 // 4-Bit Carry-Lookahead Adder
 module carry_look_ahead_4bit(
@@ -10,20 +10,29 @@ module carry_look_ahead_4bit(
   output logic c_out
 );
 
-
   logic [3:0] p;
   logic [3:0] g;
   logic [3:0] temp;
+  logic [3:0] temp_genvar;
+  logic [3:0] temp_genvar_2;
 
 assign p = a_in ^ b_in; // propagate
 assign g = a_in & b_in; // generate
 
+  // Generate partial signals for each bits
+  genvar i;
+  generate
+    for (i = 1; i < 4; i++) begin
+      assign temp_genvar[i] = p[i] & g[i-1]; 
+      assign temp_genvar_2[i] = p[i] & p[i-1];  
+    end
+  endgenerate
   assign temp[0] = c_in;
   assign temp[1] = g[0] | (p[0] & temp[0]);
-  assign temp[2] = g[1] | (p[1] & g[0]) | p[1] & p[0] & temp[0];
-  assign temp[3] = g[2] | (p[2] & g[1]) | p[2] & p[1] & g[0] | p[2] & p[1] & p[0] & temp[0];
-  assign c_out = g[3] | (p[3] & g[2]) | p[3] & p[2] & g[1] | p[3] & p[2] & p[1] & g[0] | p[3] & p[2] & p[1] & p[0] & temp[0];
-assign sum_out = p ^ temp;
+  assign temp[2] = g[1] | temp_genvar[1] | (temp_genvar_2[1] & temp[0]);
+  assign temp[3] = g[2] | temp_genvar[2] | (temp_genvar[1] & g[0]) | (temp_genvar_2[1] & p[0] & temp[0]);
+  assign c_out   = g[3] | temp_genvar[3] | (temp_genvar_2[3] & g[1]) | (p[3] & temp_genvar_2[2] & g[0]) | (p[3] & temp_genvar_2[2] & p[0] & temp[0]);
+  assign sum_out = p ^ temp;
 
 endmodule
 
