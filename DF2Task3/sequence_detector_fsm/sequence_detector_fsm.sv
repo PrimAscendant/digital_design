@@ -1,5 +1,5 @@
 // 
-// v 0.5
+// v 0.6
 // simple Sequence Detector with FSM
 
 
@@ -32,7 +32,7 @@ module fsm(
 
       S1: begin
         if (in_i == 1'b0) next = S2;
-        else            next = S1;
+        else            next = S0;
       end
 
       S2: begin
@@ -42,7 +42,7 @@ module fsm(
 
       S3: begin
         if (in_i == 1'b1) next = S4;
-        else            next = S2;
+        else            next = S0;
       end
 
       S4: begin
@@ -56,7 +56,7 @@ module fsm(
 
 
   always_ff @(posedge clk or negedge reset_i) begin
-    if (reset_i) begin
+    if (~reset_i) begin
       state <= S0;
       detected_o     <= 1'b0;
     end

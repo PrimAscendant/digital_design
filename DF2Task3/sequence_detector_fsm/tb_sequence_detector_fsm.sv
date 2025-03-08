@@ -21,7 +21,8 @@ module test;
         $dumpfile("dump.vcd");
         $dumpvars(0, test);
 
-        #25
+        reset_i = 0;
+        #20
         reset_i = 0;  
         in_i = 1; 
         #20;
@@ -31,7 +32,7 @@ module test;
         in_i = 1; 
         #20;
         in_i = 1;
-      // detected_o should be 1
+      // detected_o should be 0
         #50
         reset_i = 1; 
         
@@ -45,6 +46,7 @@ module test;
         #20;
         in_i = 1; 
       
+      //detected_o should be 1
       // other
         #20;
         in_i = 1; 
