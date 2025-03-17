@@ -1,5 +1,5 @@
 //`timescale 1ns / 1ps
-// Revision 0.6
+// Revision 0.8
 
 module spi_master (
     input logic clk,        
@@ -15,32 +15,23 @@ module spi_master (
     output logic done        
 );
 
-   localparam IDLE  = 2'b00; // Wait
-   localparam START = 2'b01; // Start tranfer
-   localparam TRANS = 2'b10; // Transfer process
-   localparam DONE  = 2'b11; // Finish and go to the IDLE
+  typedef enum logic [2:0] {
+   IDLE  = 2'b00, // Wait
+   START = 2'b01, // Start tranfer
+   TRANS = 2'b10, // Transfer process
+   DONE  = 2'b11 // Finish and go to the IDLE
+  } state_t;
 
-   logic [1:0] state, next_state;
+   state_t state, next_state;
+   // logic [1:0] state, next_state;
    logic [7:0] shift_reg;   
   logic [2:0] bit_cnt; // Couter bit trascation
    logic sck_reg; // Register is used to generate the SCK output
    assign SCK = sck_reg;
 
-
-   always @(posedge clk or posedge reset) begin
-      if (reset) begin
-         sck_reg <= 1'b0;
-         MOSI <= 1'b0;
-         CS <= 1'b1; // Usually if CS = 1, "subordinate" dont select 
-         state <= IDLE;
-         bit_cnt <= 3'b0;
-         shift_reg <= 8'b0;
-         data_out <= 8'b0;
-         done <= 1'b0;
-      end 
-      else begin
-         state <= next_state;
-         case (state)
+//syn
+   always_comb begin
+	  case(state)
             IDLE: begin
                done <= 1'b0;
                CS <= 1'b1;
@@ -49,9 +40,9 @@ module spi_master (
                   shift_reg <= data_in;
                end
             end
-            START: begin
+           START: begin
                CS <= 1'b0;     
-               bit_cnt <= 3'd7;     
+               bit_cnt <= 7;     
             end
             TRANS: begin
                sck_reg <= ~sck_reg;  // Toggle the internal clock line
@@ -61,7 +52,7 @@ module spi_master (
                else begin
                   shift_reg[bit_cnt] <= MISO;
 
-                  if (bit_cnt == 3'd0) begin
+                  if (bit_cnt == 0) begin
                      data_out <= shift_reg; // Once we have received the last bit, store it out
                   end 
                   else begin
@@ -77,17 +68,68 @@ module spi_master (
 
          endcase
       end
+// asyn
+    always_ff @(posedge clk or negedge reset) begin
+       if (~reset) begin
+         state <= IDLE;
+         sck_reg <= 1'b0;
+         MOSI <= 1'b0;
+         CS <= 1'b1; // Usually if CS = 1, "subordinate" dont select 
+         bit_cnt <= 3'b0;
+         shift_reg <= 8'b0;
+         data_out <= 8'b0;
+         done <= 1'b0;
+      end 
+      else begin
+         state <= next_state;
+            state <= IDLE;
+            else begin
+         state <= IDLE;
+         sck_reg <= 1'b0;
+         MOSI <= 1'b0;
+         CS <= 1'b1;
+         bit_cnt <= 3'b0;
+         shift_reg <= 8'b0;
+         data_out <= 8'b0;
+         done <= 1'b0;
+      end 
+            state <= START;
+            else begin
+         state <= IDLE;
+         sck_reg <= 1'b0;
+         MOSI <= 1'b0;
+         CS <= 1'b1; 
+         bit_cnt <= 3'b0;
+         shift_reg <= 8'b0;
+         data_out <= 8'b0;
+         done <= 1'b0;
+      end 
+            state <= TRANS;
+            else begin
+         state <= IDLE;
+         sck_reg <= 1'b0;
+         MOSI <= 1'b0;
+         CS <= 1'b1;
+         bit_cnt <= 3'b0;
+         shift_reg <= 8'b0;
+         data_out <= 8'b0;
+         done <= 1'b0;
+      end 
+            state <= DONE;
+
+            default: state = IDLE;
+         endcase
+      end
    end
-  
-   always @(*) begin
+
+   always_comb @(*) begin
       next_state = state;
       case (state)
          IDLE: if (start) next_state = START;
          START: next_state = TRANS;
-         TRANS: if (bit_cnt == 3'd0 && sck_reg == 1'b1) next_state = DONE;
+         TRANS: if (bit_cnt == 0 && sck_reg == 1'b1) next_state = DONE;
         DONE: if (done) next_state = IDLE;
       endcase
    end
 
 endmodule
-
