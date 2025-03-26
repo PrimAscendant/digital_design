@@ -64,6 +64,12 @@ module spi_master (
                 sck_reg <= 1'b0;
                 done <= 1'b1;   
             end
+            default: begin
+                done = 1'b0;
+                CS = 1'b1;
+                sck_reg = 1'b0;
+                MOSI = 1'b0;
+            end
         endcase
     end
 
@@ -91,6 +97,7 @@ module spi_master (
             START:  next_state = TRANS;
             TRANS:  if (bit_cnt == 0 && sck_reg == 1'b1) next_state = DONE;
             DONE:   next_state = IDLE;
+            default: next_state = IDLE;
         endcase
     end
 
