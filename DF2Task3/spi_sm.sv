@@ -94,6 +94,12 @@ module SPI_Slave #(parameter N = 8)(
         DONE: begin
           done <= 1'b1;
         end
+         default: begin
+           shift_reg <= 8'b0;
+           data_out <= 8'b0;
+           bit_cnt <= 3'b0;
+           done <= 1'b0;
+         end
       endcase
     end
   end
@@ -105,6 +111,7 @@ module SPI_Slave #(parameter N = 8)(
       START: next_state = TRANS;
       TRANS: if ((bit_cnt == 0) && sck_rising) next_state = DONE;
       DONE: if (cs_sync) next_state = IDLE;
+      default: next_state = IDLE;
     endcase
   end
 
