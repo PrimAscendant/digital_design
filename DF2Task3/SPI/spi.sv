@@ -105,4 +105,4 @@ module spi_master (
             default: next_state = IDLE;
         endcase
     end
-endmodule
+endmodule 
