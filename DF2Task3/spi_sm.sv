@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 // SPI Slave Module
-// Revision 0.6
+// Revision 0.7
 module SPI_Slave #(parameter N = 8)(
   input logic   clk,
   input logic reset, // Reset, active low
@@ -100,9 +100,11 @@ module SPI_Slave #(parameter N = 8)(
             done = 1'b0;
             MISO = 1'b0;
         end
+        TRANS: begin
+          MISO = miso_shift[N-1];
+        end
         DONE: begin
             done = 1'b1;
-            MISO = miso_shift[N-1];
         end
     endcase
   end
