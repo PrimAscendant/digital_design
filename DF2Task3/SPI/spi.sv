@@ -1,5 +1,5 @@
 `timescale 1ns / 1ps
-// Revision 1.0
+// Revision 1.1
 
 module spi_master (
     input logic             clk,        
@@ -24,7 +24,6 @@ module spi_master (
 
     state_t state, next_state;
     logic [7:0]    shift_reg;
-    logic [7:0] miso_storage;
     logic [2:0]      bit_cnt; // Couter bit trascation
     logic            sck_reg; // Register is used to generate the SCK output
     
@@ -36,7 +35,6 @@ module spi_master (
             sck_reg      <= 1'b0;
             shift_reg    <= 8'b0;
             bit_cnt      <= 3'b0;
-            miso_storage <= 8'b0;
         end
          else begin
             state <= next_state;
@@ -50,7 +48,6 @@ module spi_master (
                     sck_reg <= ~sck_reg;
                     if (sck_reg == 1'b1) begin  // When sck_reg transitions to 1 (rises), shift in the MISO bit
                         shift_reg <= {shift_reg[6:0], MISO}; // move 7 bits (from most significant) in each rising edge sck_reg
-                        miso_storage <= {shift_reg[6:0], MISO}; // 11111111 >> 11111110 >> 11111100 >> etc
                         bit_cnt <= bit_cnt - 1'b1;  // Decrement bit counter
                     end
                 end
@@ -61,7 +58,6 @@ module spi_master (
                     sck_reg      <= 1'b0;
                     shift_reg    <= 8'b0;
                     bit_cnt      <= 3'd0;
-                    miso_storage <= 8'b0;
                 end
             endcase
         end
@@ -85,7 +81,7 @@ module spi_master (
             end
             DONE: begin
                 CS = 1'b1; // De-select subordinate
-                data_out = miso_storage;
+                data_out = shift_reg;
                 done = 1'b1;   
             end
             default: begin
